@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "JceStruct"
+version = "0.1.0"
+description = "JCE Encode/Decode"
+authors = ["yanyongyu <yanyongyu_1@126.com>"]
+license = "MIT"
+readme = "README.md"
+keywords = ["jce"]
+packages = [
+    { include = "jce" }
+]
+include = ["jce/py.typed"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pydantic = "^1.7.3"
+
+[tool.poetry.dev-dependencies]
+yapf = "^0.30.0"
+
+[[tool.poetry.source]]
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple/"
+default = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
