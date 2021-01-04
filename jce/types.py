@@ -171,10 +171,10 @@ class STRING(JceType, str):
     def to_bytes(cls, jce_id: int, value: str) -> bytes:
         byte = value.encode()
         if len(byte) < 256:
-            return bytes([jce_id << 4 | cls.__jce_type__[0]]) + INT.to_bytes(
-                0, len(byte)) + byte
-        return bytes([jce_id << 4 | cls.__jce_type__[1]]) + INT.to_bytes(
-            0, len(byte)) + byte
+            return bytes([jce_id << 4 | cls.__jce_type__[0]]) + struct.pack(
+                ">B", len(byte)) + byte
+        return bytes([jce_id << 4 | cls.__jce_type__[1]]) + struct.pack(
+            ">I", len(byte)) + byte
 
 
 class MAP(JceType, dict):

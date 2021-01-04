@@ -1,8 +1,7 @@
 from typing import Any, Dict, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from jce.types import JceType
-    from jce.field import JceModelField
+    from jce.types import JceType, JceModelField
 
 
 class JceEncoder:
