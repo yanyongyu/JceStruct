@@ -1,4 +1,4 @@
-from jce.struct import JceStruct
+import jce.types as types
 from jce.encoder import JceEncoder
 from jce.decoder import JceDecoder
-from jce.field import JceField, JceTypes
+from jce.types import JceStruct, JceField

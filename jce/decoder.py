@@ -1,9 +1,8 @@
 from typing import Any, Dict, Type, TypeVar, TYPE_CHECKING
 
-from jce.field import JceModelField
-
 if TYPE_CHECKING:
-    from jce.struct import JceStruct
+    from jce.types import JceStruct
+    from jce.field import JceModelField
 
 T = TypeVar("T", bound="JceStruct")
 
@@ -15,7 +14,7 @@ class JceDecoder:
         return {}
 
     @classmethod
-    def decode(cls, struct: Type[T], fields: Dict[str, JceModelField], data,
+    def decode(cls, struct: Type[T], fields: Dict[str, "JceModelField"], data,
                **extra) -> T:
         result = {}
         data = cls.decode_byte(data)
