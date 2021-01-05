@@ -11,6 +11,11 @@ dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
 typing_extensions = ["typing-extensions (>=3.7.2)"]
 
+[package.source]
+type = "legacy"
+url = "https://mirrors.aliyun.com/pypi/simple"
+reference = "aliyun"
+
 [[package]]
 name = "yapf"
 version = "0.30.0"
@@ -19,10 +24,15 @@ category = "dev"
 optional = false
 python-versions = "*"
 
+[package.source]
+type = "legacy"
+url = "https://mirrors.aliyun.com/pypi/simple"
+reference = "aliyun"
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "2b351f742c994d9df7f7ec7843e8e7a9683fac1a5195a006b55f75208b4c1078"
+content-hash = "a23082935f231418e15d0d18ce6704fa28c97036f1ce7cd35c72bbc6ec9505a1"
 
 [metadata.files]
 pydantic = [
