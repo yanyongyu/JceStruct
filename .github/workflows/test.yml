@@ -24,6 +24,16 @@ jobs:
           python-version: 3.8
           architecture: "x64"
       
+      - uses: Gr1N/setup-poetry@v4
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      
       - name: Run Unit Tests
         run: |
           python -m unittest discover -s tests
