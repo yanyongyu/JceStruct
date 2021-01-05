@@ -138,6 +138,7 @@ class JceDecoder:
         default_types: Optional[Dict[int, "JceType"]] = None
     ) -> Tuple[int, Any, int]:
         jce_id, type_, head_length = cls.decode_head(jce_byte)
+        default_types = default_types or JceStruct.__jce_default_type__
         JceType = default_types.get(type_)
         if not JceType:
             raise ValueError(f"Unknown JceType for id {type_}")
@@ -154,10 +155,11 @@ class JceDecoder:
         result = {}
         default_types = default_types or JceStruct.__jce_default_type__
         while offset < len(jce_byte):
-            jce_id, data, data_length = cls.decode_single(jce_byte)
+            jce_id, data, data_length = cls.decode_single(
+                jce_byte[offset:], default_types)
             result[jce_id] = data
             offset += data_length
-        return {}
+        return result
 
     @classmethod
     def decode(cls, jce_struct: Type[S], fields: Dict[str, "JceModelField"],
@@ -166,7 +168,7 @@ class JceDecoder:
         default_type = jce_struct.__jce_default_type__
         jce_data = cls.decode_bytes(data, default_type)
         for name, field in fields.items():
-            result[name] = jce_data[field.jce_id]
+            result[name] = jce_data.get(field.jce_id)
         result.update(extra)
         return jce_struct.parse_obj(result)  # type: ignore
 
@@ -372,7 +374,7 @@ class STRING1(STRING):
     @classmethod
     def from_bytes(cls, data: bytes) -> Tuple[str, int]:
         length = struct.unpack_from(">B", data)[0]
-        return data[1:length + 1].decode(), length
+        return data[1:length + 1].decode(), length + 1
 
 
 class STRING4(STRING):
@@ -380,7 +382,7 @@ class STRING4(STRING):
     @classmethod
     def from_bytes(cls, data: bytes) -> Tuple[str, int]:
         length = struct.unpack_from(">I", data)[0]
-        return data[4:length + 4].decode(), length
+        return data[4:length + 4].decode(), length + 4
 
 
 class MAP(JceType, dict):
