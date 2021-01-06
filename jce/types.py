@@ -233,7 +233,7 @@ class BOOL(JceType, int):
         return bool(value)
 
     @classmethod
-    def to_byte(cls, jce_id: int, value: bool) -> bytes:
+    def to_bytes(cls, jce_id: int, value: bool) -> bytes:
         return cls.head_byte(jce_id, cls.__jce_type__[0]) + struct.pack(
             ">?", value)
 
@@ -270,7 +270,7 @@ class INT(JceType, int):
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Tuple[int, int]:
-        raise NotImplementedError
+        return struct.unpack_from(">b", data)[0], 1
 
     @classmethod
     def validate(cls, v):
@@ -569,8 +569,8 @@ class JceMetaclass(ModelMetaclass):
 class JceStruct(JceType, BaseModel, metaclass=JceMetaclass):
 
     if TYPE_CHECKING:
-        __jce_encoder__: Type["JceEncoder"]
-        __jce_decoder__: Type["JceDecoder"]
+        __jce_encoder__: Type[JceEncoder]
+        __jce_decoder__: Type[JceDecoder]
         __jce_fields__: Dict[str, JceModelField]
         __jce_default_type__: Dict[int, JceType]
 
@@ -578,13 +578,13 @@ class JceStruct(JceType, BaseModel, metaclass=JceMetaclass):
         return self.__jce_encoder__.encode(self.__jce_fields__, self.dict())
 
     @classmethod
-    def to_bytes(cls, jce_id: int, value) -> bytes:
+    def to_bytes(cls, jce_id: int, value: Dict[str, Any]) -> bytes:
         return (STRUCT_START.to_bytes(jce_id, None) +
                 cls.__jce_encoder__.encode(cls.__jce_fields__, value) +
                 STRUCT_END.to_bytes(jce_id, None))
 
     @classmethod
-    def decode(cls, data: bytes, **extra):
+    def decode(cls: Type[S], data: bytes, **extra) -> S:
         return cls.__jce_decoder__.decode(cls, cls.__jce_fields__, data,
                                           **extra)
 

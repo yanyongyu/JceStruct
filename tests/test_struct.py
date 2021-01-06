@@ -12,9 +12,17 @@ class SsoServerInfo(JceStruct):
     extra_default: str = "extra"
 
 
-class TestDecode(unittest.TestCase):
+class TestEncode(unittest.TestCase):
 
-    def test_struct(self):
+    def test_struct_encode(self):
+        byte = SsoServerInfo(server="rcnb",
+                             port=8000,
+                             location="rcnb",
+                             extra="xxx").encode()
+        self.assertEqual(
+            byte, bytes.fromhex("16 04 72 63 6e 62 21 1f 40 86 04 72 63 6e 62"))
+
+    def test_struct_decode(self):
         a = SsoServerInfo.decode(
             bytes.fromhex("16 04 72 63 6e 62 21 1f 40 86 04 72 63 6e 62"),
             extra="xxx")
