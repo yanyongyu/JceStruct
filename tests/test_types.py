@@ -1,9 +1,27 @@
 import unittest
 
-from jce import types, JceStruct, JceField
+from jce import types, JceDecoder
 
 
 class TestDecode(unittest.TestCase):
+
+    def test_head_encode(self):
+        raw = 1
+        encoded = bytes.fromhex("10")
+        self.assertEqual(types.JceType.head_byte(raw, 0), encoded)
+
+        raw = 0xAA
+        encoded = bytes.fromhex("F0 AA")
+        self.assertEqual(types.JceType.head_byte(raw, 0), encoded)
+
+    def test_head_decode(self):
+        raw = 1
+        encoded = bytes.fromhex("10")
+        self.assertEqual(JceDecoder.decode_head(encoded), (raw, 0, 1))
+
+        raw = 0xAA
+        encoded = bytes.fromhex("F0 AA")
+        self.assertEqual(JceDecoder.decode_head(encoded), (raw, 0, 2))
 
     def test_byte_encode(self):
         raw = bytes([0xF0])
