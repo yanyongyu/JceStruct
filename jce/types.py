@@ -234,8 +234,7 @@ class BOOL(JceType, int):
 
     @classmethod
     def to_bytes(cls, jce_id: int, value: bool) -> bytes:
-        return cls.head_byte(jce_id, cls.__jce_type__[0]) + struct.pack(
-            ">?", value)
+        return BYTE.to_bytes(jce_id, bytes([value]))
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Tuple[bool, int]:
@@ -402,6 +401,7 @@ class MAP(JceType, dict):
 
         result = {}
         data_length = head_length
+        # TODO: unknown type
         for _ in range(data_count):
             _, key, key_length = cls.__jce_decoder__.decode_single(
                 data[data_length:])
@@ -527,6 +527,29 @@ class ZERO_TAG(JceType):
         return bytes([0]), 0
 
 
+class BYTES(JceType, bytes):
+    __jce_type__ = (13,)
+
+    @classmethod
+    def to_bytes(cls, jce_id: int, value: bytes) -> bytes:
+        return cls.head_byte(jce_id, cls.__jce_type__[0]) + cls.head_byte(
+            0, 0) + INT.to_bytes(0, len(value)) + value
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> Tuple[bytes, int]:
+        _, byte_length, head_length = cls.__jce_decoder__.decode_single(
+            data[1:])
+
+        data_length = head_length + 1
+        return data[data_length:data_length +
+                    byte_length], data_length + byte_length
+
+    @classmethod
+    def validate(cls, v):
+        v = cls(v)
+        return v
+
+
 class JceMetaclass(ModelMetaclass):
 
     def __new__(mcs, name, bases, namespace):
@@ -547,7 +570,8 @@ class JceMetaclass(ModelMetaclass):
                 9: LIST,
                 10: STRUCT_START,
                 11: STRUCT_END,
-                12: ZERO_TAG
+                12: ZERO_TAG,
+                13: BYTES
             })
         if Encoder is not JceEncoder and not issubclass(Encoder, JceEncoder):
             raise TypeError(f"Encoder {Encoder} is not a valid encoder")
