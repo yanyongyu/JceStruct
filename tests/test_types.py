@@ -202,6 +202,17 @@ class TestDecode(unittest.TestCase):
         _, decoded, _ = JceDecoder.decode_single(encoded)
         self.assertEqual(types.LIST.validate(decoded), raw)
 
+    def test_bytes_encode(self):
+        raw = b"hello"
+        encoded = bytes.fromhex("1D 00 00 05 68 65 6C 6C 6F")
+        self.assertEqual(types.BYTES.to_bytes(1, raw), encoded)
+
+    def test_bytes_decode(self):
+        raw = b"hello"
+        encoded = bytes.fromhex("1D 00 00 05 68 65 6C 6C 6F")
+        _, decoded, _ = JceDecoder.decode_single(encoded)
+        self.assertEqual(types.BYTES.validate(decoded), raw)
+
 
 if __name__ == "__main__":
     unittest.main()
