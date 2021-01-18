@@ -9,6 +9,8 @@ from pydantic.fields import Undefined, ModelField
 
 T = TypeVar("T", bound="JceType")
 S = TypeVar("S", bound="JceStruct")
+T_INT = TypeVar("T_INT", bound="INT")
+T_STRING = TypeVar("T_STRING", bound="STRING")
 
 
 def JceField(
@@ -136,14 +138,14 @@ class JceDecoder:
         cls,
         jce_byte: bytes,
         default_types: Optional[Dict[int, "JceType"]] = None
-    ) -> Tuple[int, Any, int]:
+    ) -> Tuple[int, "JceType", int]:
         jce_id, type_, head_length = cls.decode_head(jce_byte)
         default_types = default_types or JceStruct.__jce_default_type__
         JceType = default_types.get(type_)
         if not JceType:
             raise ValueError(f"Unknown JceType for id {type_}")
         data, data_length = JceType.from_bytes(jce_byte[head_length:])
-        return jce_id, data, head_length + data_length
+        return jce_id, JceType.validate(data), head_length + data_length
 
     @classmethod
     def decode_bytes(
@@ -178,7 +180,7 @@ class JceType(abc.ABC):
     __jce_decoder__: Type[JceDecoder] = JceDecoder
 
     @classmethod
-    def head_byte(cls: Type[T], jce_id: int, jce_type: int) -> bytes:
+    def head_byte(cls, jce_id: int, jce_type: int) -> bytes:
         if jce_id < 15:
             return bytes([jce_id << 4 | jce_type])
         else:
@@ -186,12 +188,12 @@ class JceType(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def to_bytes(cls: Type[T], jce_id: int, value: Any) -> bytes:
+    def to_bytes(cls, jce_id: int, value: Any) -> bytes:
         raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
-    def from_bytes(cls: Type[T], data: bytes) -> Tuple[Any, int]:
+    def from_bytes(cls, data: bytes) -> Tuple[Any, int]:
         raise NotImplementedError
 
     @classmethod
@@ -199,7 +201,7 @@ class JceType(abc.ABC):
         yield cls.validate
 
     @classmethod
-    def validate(cls, v):
+    def validate(cls: Type[T], v) -> T:
         return cls(v)  # type: ignore
 
 
@@ -230,7 +232,7 @@ class BOOL(JceType, int):
     __jce_type__ = (0,)
 
     def __new__(cls, value=None):
-        return bool(value)
+        return super().__new__(cls, bool(value))
 
     @classmethod
     def to_bytes(cls, jce_id: int, value: bool) -> bytes:
@@ -269,15 +271,33 @@ class INT(JceType, int):
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Tuple[int, int]:
-        return struct.unpack_from(">b", data)[0], 1
+        raise NotImplementedError
 
     @classmethod
-    def validate(cls, v):
+    def validate(cls: Type[T_INT], v) -> T_INT:
         if isinstance(v, bytes):
-            v, _ = cls.from_bytes(v)
+            length = len(v)
+            if length == 1:
+                v, _ = INT8.from_bytes(v)
+            elif length == 2:
+                v, _ = INT16.from_bytes(v)
+            elif length == 4:
+                v, _ = INT32.from_bytes(v)
+            elif length == 8:
+                v, _ = INT64.from_bytes(v)
+            else:
+                raise ValueError(
+                    f"Invalid value length: {v}(length {8*length})")
         elif not isinstance(v, int):
             raise TypeError(f"Invalid value type: {type(v)}")
         return cls(v)
+
+
+class INT8(INT):
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> Tuple[int, int]:
+        return struct.unpack_from(">b", data)[0], 1
 
 
 class INT16(INT):
@@ -360,7 +380,7 @@ class STRING(JceType, str):
         raise NotImplementedError
 
     @classmethod
-    def validate(cls, v):
+    def validate(cls: Type[T_STRING], v) -> T_STRING:
         if isinstance(v, bytes):
             v = v.decode()
         elif not isinstance(v, str):
@@ -401,7 +421,7 @@ class MAP(JceType, dict):
 
         result = {}
         data_length = head_length
-        # TODO: unknown type
+        data_count = INT32.validate(data_count)
         for _ in range(data_count):
             _, key, key_length = cls.__jce_decoder__.decode_single(
                 data[data_length:])
@@ -430,14 +450,14 @@ class MAP(JceType, dict):
                 except TypeError:
                     raise TypeError(
                         f"Invalid MAP key: {key}({type(key)})") from None
-                key = key_type(key)  # type: ignore
+                key = key_type.validate(key)  # type: ignore
             if not isinstance(value, JceType):
                 try:
                     value_type = guess_jce_type(value)
                 except TypeError:
                     raise TypeError(
                         f"Invalid MAP value: {value}({type(value)})") from None
-                value = value_type(value)  # type: ignore
+                value = value_type.validate(value)  # type: ignore
 
             new_instance[key] = value
 
@@ -449,7 +469,7 @@ class LIST(JceType, list):
 
     @classmethod
     def to_bytes(cls, jce_id: int, value: List[JceType]) -> bytes:
-        byte = cls.head_byte(jce_id, cls.__jce_type__[0]) + INT.to_bytes(
+        byte = cls.head_byte(jce_id, cls.__jce_type__[0]) + INT32.to_bytes(
             0, len(value))
         for v in value:
             byte += v.to_bytes(0, v)
@@ -461,6 +481,7 @@ class LIST(JceType, list):
 
         result = []
         data_length = head_length
+        list_count = INT32.validate(list_count)
         for _ in range(list_count):
             _, item, item_length = cls.__jce_decoder__.decode_single(
                 data[data_length:])
@@ -515,7 +536,7 @@ class STRUCT_END(JceType):
         return None, 0
 
 
-class ZERO_TAG(JceType):
+class ZERO_TAG(JceType, bytes):
     __jce_type__ = (12,)
 
     @classmethod
@@ -533,7 +554,7 @@ class BYTES(JceType, bytes):
     @classmethod
     def to_bytes(cls, jce_id: int, value: bytes) -> bytes:
         return cls.head_byte(jce_id, cls.__jce_type__[0]) + cls.head_byte(
-            0, 0) + INT.to_bytes(0, len(value)) + value
+            0, 0) + INT32.to_bytes(0, len(value)) + value
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Tuple[bytes, int]:
@@ -541,6 +562,7 @@ class BYTES(JceType, bytes):
             data[1:])
 
         data_length = head_length + 1
+        byte_length = INT32.validate(byte_length)
         return data[data_length:data_length +
                     byte_length], data_length + byte_length
 
@@ -613,18 +635,18 @@ class JceStruct(JceType, BaseModel, metaclass=JceMetaclass):
                                           **extra)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> Tuple[Dict[int, Any], int]:
+    def from_bytes(cls, data: bytes) -> Tuple[Dict[int, JceType], int]:
         offset = 0
         result = {}
         struct_end = False
         while not struct_end and offset < len(data):
-            jce_id, data, data_length = cls.__jce_decoder__.decode_single(
+            jce_id, decoded, data_length = cls.__jce_decoder__.decode_single(
                 data[offset:])
             offset += data_length
-            if data == None:
+            if decoded == None:
                 struct_end = True
                 break
-            result[jce_id] = data
+            result[jce_id] = decoded
 
         if not struct_end:
             raise ValueError(f"Struct end not found")

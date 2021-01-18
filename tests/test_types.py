@@ -178,6 +178,30 @@ class TestDecode(unittest.TestCase):
         _, decoded, _ = JceDecoder.decode_single(encoded)
         self.assertEqual(types.MAP.validate(decoded), raw)
 
+    def test_list_encode(self):
+        raw = [types.INT(1), types.BOOL(False), types.STRING1("123")]
+        encoded = bytes.fromhex("19 00 03 00 01 0C 06 03 31 32 33")
+        self.assertEqual(types.LIST.to_bytes(1, raw), encoded)
+
+        raw = []
+        encoded = bytes.fromhex("19 0C")
+        self.assertEqual(types.LIST.to_bytes(1, raw), encoded)
+
+    def test_list_decode(self):
+        raw = [types.INT(1), types.BOOL(False), types.STRING1("123")]
+        encoded = bytes.fromhex("19 00 03 00 01 0C 06 03 31 32 33")
+        _, decoded, _ = JceDecoder.decode_single(encoded)
+        result = types.LIST.validate(decoded)
+        result[0] = types.INT.validate(result[0])
+        result[1] = types.BOOL.validate(result[1])
+        result[2] = types.STRING1.validate(result[2])
+        self.assertEqual(result, raw)
+
+        raw = []
+        encoded = bytes.fromhex("19 0C")
+        _, decoded, _ = JceDecoder.decode_single(encoded)
+        self.assertEqual(types.LIST.validate(decoded), raw)
+
 
 if __name__ == "__main__":
     unittest.main()
