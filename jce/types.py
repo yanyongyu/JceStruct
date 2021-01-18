@@ -166,11 +166,17 @@ class JceDecoder:
     @classmethod
     def decode(cls, jce_struct: Type[S], fields: Dict[str, "JceModelField"],
                data: bytes, **extra) -> S:
-        result = {}
         default_type = jce_struct.__jce_default_type__
-        jce_data = cls.decode_bytes(data, default_type)
+        jce_dict = cls.decode_bytes(data, default_type)
+        return cls.from_jce_dict(jce_struct, jce_dict, fields, **extra)
+
+    @classmethod
+    def from_jce_dict(cls, jce_struct: Type[S], fields: Dict[str,
+                                                             "JceModelField"],
+                      jce_dict: Dict[int, "JceType"], **extra) -> S:
+        result = {}
         for name, field in fields.items():
-            result[name] = jce_data.get(field.jce_id)
+            result[name] = jce_dict.get(field.jce_id)
         result.update(extra)
         return jce_struct.parse_obj(result)  # type: ignore
 
@@ -633,6 +639,17 @@ class JceStruct(JceType, BaseModel, metaclass=JceMetaclass):
     def decode(cls: Type[S], data: bytes, **extra) -> S:
         return cls.__jce_decoder__.decode(cls, cls.__jce_fields__, data,
                                           **extra)
+
+    @classmethod
+    def decode_list(cls: Type[S], data: bytes, jce_id: int, **extra) -> List[S]:
+        decoded = cls.__jce_decoder__.decode_bytes(data)
+        result_list = decoded.get(jce_id)
+        if not isinstance(result_list, list):
+            raise TypeError(f"Value at jce_id {jce_id} is not a list")
+        for index in range(len(result_list)):
+            result_list[index] = cls.__jce_decoder__.from_jce_dict(
+                cls, cls.__jce_fields__, result_list[index], **extra)
+        return result_list
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Tuple[Dict[int, JceType], int]:
