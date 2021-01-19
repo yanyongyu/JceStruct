@@ -32,6 +32,10 @@ class TestEncode(unittest.TestCase):
                           extra="xxx")
         self.assertEqual(a, b)
 
+    def test_struct_nested_encode(self):
+        # TODO
+        pass
+
 
 if __name__ == "__main__":
     unittest.main()

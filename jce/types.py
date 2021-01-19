@@ -168,7 +168,7 @@ class JceDecoder:
                data: bytes, **extra) -> S:
         default_type = jce_struct.__jce_default_type__
         jce_dict = cls.decode_bytes(data, default_type)
-        return cls.from_jce_dict(jce_struct, jce_dict, fields, **extra)
+        return cls.from_jce_dict(jce_struct, fields, jce_dict, **extra)
 
     @classmethod
     def from_jce_dict(cls, jce_struct: Type[S], fields: Dict[str,
@@ -529,6 +529,10 @@ class STRUCT_START(JceType):
     def from_bytes(cls, data: bytes) -> Tuple[Dict[int, Any], int]:
         return JceStruct.from_bytes(data)
 
+    @classmethod
+    def validate(cls, v):
+        return v
+
 
 class STRUCT_END(JceType):
     __jce_type__ = (11,)
@@ -540,6 +544,10 @@ class STRUCT_END(JceType):
     @classmethod
     def from_bytes(cls, data: bytes) -> Tuple[None, int]:
         return None, 0
+
+    @classmethod
+    def validate(cls, v):
+        return v
 
 
 class ZERO_TAG(JceType, bytes):
