@@ -4,7 +4,7 @@ from typing import Dict
 from jce import types, JceDecoder
 
 
-class TestDecode(unittest.TestCase):
+class TestTypes(unittest.TestCase):
 
     def test_head_encode(self):
         raw = 1
