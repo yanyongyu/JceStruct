@@ -148,7 +148,8 @@ class JceDecoder:
     @classmethod
     def decode_single(cls,
                       jce_byte: bytes,
-                      default_types: Optional[Dict[int, "JceType"]] = None,
+                      default_types: Optional[Dict[int,
+                                                   Type["JceType"]]] = None,
                       **extra) -> Tuple[int, "JceType", int]:
         jce_id, type_, head_length = cls.decode_head(jce_byte)
         default_types = default_types or JceStruct.__jce_default_type__
@@ -161,7 +162,7 @@ class JceDecoder:
     @classmethod
     def decode_bytes(cls,
                      jce_byte: bytes,
-                     default_types: Optional[Dict[int, "JceType"]] = None,
+                     default_types: Optional[Dict[int, Type["JceType"]]] = None,
                      **extra) -> Dict[int, Any]:
         offset = 0
         result = {}
@@ -656,7 +657,7 @@ class JceStruct(JceType, BaseModel, metaclass=JceMetaclass):
         __jce_encoder__: Type[JceEncoder]
         __jce_decoder__: Type[JceDecoder]
         __jce_fields__: Dict[str, JceModelField]
-        __jce_default_type__: Dict[int, JceType]
+        __jce_default_type__: Dict[int, Type[JceType]]
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -665,7 +666,7 @@ class JceStruct(JceType, BaseModel, metaclass=JceMetaclass):
         return self.__jce_encoder__.encode(self.__jce_fields__, self)
 
     @classmethod
-    def to_bytes(cls, jce_id: int, value: Dict[str, Any]) -> bytes:
+    def to_bytes(cls: Type[S], jce_id: int, value: S) -> bytes:
         return (STRUCT_START.to_bytes(jce_id, None) +
                 cls.__jce_encoder__.encode(cls.__jce_fields__, value) +
                 STRUCT_END.to_bytes(jce_id, None))
@@ -729,12 +730,12 @@ class JceStruct(JceType, BaseModel, metaclass=JceMetaclass):
         return cls.parse_obj(values)
 
 
-def get_jce_type(jce_id: int) -> JceType:
+def get_jce_type(jce_id: int) -> Type[JceType]:
     return JceStruct.__jce_default_type__[jce_id]
 
 
-def guess_jce_type(object: Any) -> JceType:
-    types = {
+def guess_jce_type(object: Any) -> Type[JceType]:
+    types: Dict[type, Type[JceType]] = {
         bytes: BYTE,
         bool: BOOL,
         int: INT,
