@@ -663,7 +663,7 @@ class JceStruct(JceType, BaseModel, metaclass=JceMetaclass):
     def __getitem__(self, key):
         return getattr(self, key)
 
-    def encode(self):
+    def encode(self) -> bytes:
         return self.__jce_encoder__.encode(self.__jce_fields__, self)
 
     @classmethod
