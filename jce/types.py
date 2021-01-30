@@ -9,6 +9,7 @@ from pydantic.typing import NoArgAnyCallable
 from pydantic.fields import Undefined, ModelField
 
 T = TypeVar("T", bound="JceType")
+VT = TypeVar("VT", bound="JceType")
 S = TypeVar("S", bound="JceStruct")
 T_INT = TypeVar("T_INT", bound="INT")
 T_STRING = TypeVar("T_STRING", bound="STRING")
@@ -424,11 +425,11 @@ class STRING4(STRING):
         return data[4:length + 4].decode(), length + 4
 
 
-class MAP(JceType, dict):
+class MAP(JceType, dict, Generic[T, VT]):
     __jce_type__ = (8,)
 
     @classmethod
-    def to_bytes(cls, jce_id: int, value: Dict[JceType, JceType]) -> bytes:
+    def to_bytes(cls, jce_id: int, value: Dict[T, VT]) -> bytes:
         byte = cls.head_byte(jce_id, cls.__jce_type__[0]) + INT.to_bytes(
             0, len(value))
         for k, v in value.items():
