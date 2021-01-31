@@ -223,7 +223,7 @@ class JceType(abc.ABC):
 
     @classmethod
     def validate(cls: Type[T], v) -> T:
-        return cls(v)  # type: ignore
+        return v  # type: ignore
 
 
 class BYTE(JceType, bytes):
