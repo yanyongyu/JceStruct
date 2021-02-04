@@ -122,16 +122,16 @@ class JceEncoder:
     @classmethod
     def encode(cls, fields: Dict[str, JceModelField],
                data: "JceStruct") -> bytes:
-        byte = bytes()
+        array = bytearray()
         for name, field in fields.items():
             jce_id = field.jce_id
             jce_value = data[name]
             if isinstance(jce_value, JceType):
-                byte += cls.encode_by_value(jce_id, jce_value)
+                array += cls.encode_by_value(jce_id, jce_value)
             else:
                 jce_type = field.jce_type
-                byte += cls.encode_by_type(jce_id, jce_type, jce_value)
-        return byte
+                array += cls.encode_by_type(jce_id, jce_type, jce_value)
+        return bytes(array)
 
 
 class JceDecoder:
