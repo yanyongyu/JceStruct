@@ -104,13 +104,13 @@ def prepare_fields(fields: Dict[str, ModelField]) -> Dict[str, JceModelField]:
 class JceEncoder:
 
     @staticmethod
-    def encode_by_value(jce_id: int, jce_value: "JceType") -> bytes:
-        return jce_value.to_bytes(jce_id, jce_value)
+    def encode_by_value(jce_id: int, jce_value: Optional["JceType"]) -> bytes:
+        return jce_value.to_bytes(jce_id, jce_value) if jce_value else b""
 
     @staticmethod
     def encode_by_type(jce_id: int, jce_type: Type["JceType"],
                        jce_value: Any) -> bytes:
-        return jce_type.to_bytes(jce_id, jce_value)
+        return jce_type.to_bytes(jce_id, jce_value) if jce_value else b""
 
     @classmethod
     def encode_raw(cls, data: Dict[int, "JceType"]) -> bytes:
