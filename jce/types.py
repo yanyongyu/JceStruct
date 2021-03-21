@@ -47,7 +47,7 @@ def JceField(
     regex: str = None,
     **extra: Any,
 ) -> Any:
-    if jce_id < 1:
+    if jce_id < 0:
         raise ValueError(f"Invalid JCE ID: {jce_id}")
     if jce_type and not issubclass(jce_type, JceType):
         raise TypeError(f"Invalid JCE type: {jce_type}")
