@@ -33,21 +33,31 @@ from jce import types, JceStruct, JceField
 
 
 class ExampleStruct(JceStruct):
+    # normal definition
     field1: types.INT32 = JceField(jce_id=1)
-    field2: float = JceField(jce_id=2, jce_type=types.DOUBLE)  # define type in options
-    field3: types.LIST[OtherStruct] = JceField(jce_id=3)  # nested struct supported
-    extra_pydantic_field: str = "extra_pydantic_field"  # other field is optional
+    # define type in options
+    field2: float = JceField(jce_id=2, jce_type=types.DOUBLE)
+    # define an optional field with default value
+    field3: Optional[types.BOOL] = JceField(None, jce_id=3)
+    # nested struct supported
+    field4: types.LIST[OtherStruct] = JceField(types.LIST(), jce_id=4)
+    # optional other pydantic field
+    extra_pydantic_field: str = "extra_pydantic_field"
 ```
 
 ### Encode/Decode
 
 ```python
 # simple encode decode
-raw: ExampleStruct = ExampleStruct.decode(bytes, extra_pydantic_field="extra")
-bytes = raw.encode()
+example: ExampleStruct = ExampleStruct(
+    field1=1, field2=2., field4=types.LIST[OtherStruct()]
+)
+bytes = example.encode()
+
+example: ExampleStruct = ExampleStruct.decode(bytes, extra_pydantic_field="extra")
 
 # decode list from example struct
-raw = OtherStruct.decode_list(bytes, jce_id=3, **extra)
+others: List[OtherStruct] = OtherStruct.decode_list(bytes, jce_id=3, **extra)
 ```
 
 ### Custom Encoder/Decoder
@@ -115,4 +125,10 @@ class ExampleStruct(JceStruct):
         jce_default_type = {
             # add all types here
         }
+```
+
+## Command Line Usage
+
+```bash
+python -m jce 1f2e3d4c5b6a79
 ```
