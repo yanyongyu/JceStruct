@@ -76,6 +76,9 @@ def JceField(
 
 class JceModelField:
 
+    class NotJceModelField(Exception):
+        pass
+
     def __init__(self, jce_id: int, jce_type: Type["JceType"]):
         if not isinstance(jce_id, int) or jce_id < 0:
             raise ValueError(f"Invalid JCE ID")
@@ -93,6 +96,8 @@ class JceModelField:
         jce_id = field_info.extra.get("jce_id")
         jce_type = field_info.extra.get("jce_type") or typing.get_origin(
             field.outer_type_) or field.outer_type_
+        if jce_id is None or not issubclass(jce_type, JceType):
+            raise cls.NotJceModelField
         return cls(jce_id, jce_type)
 
 
@@ -103,6 +108,8 @@ def prepare_fields(fields: Dict[str, ModelField]) -> Dict[str, JceModelField]:
             jce_fields[name] = JceModelField.from_modelfield(field)
         except ValueError as e:
             warnings.warn(f"Error when parsing JCE field `{name}`: {repr(e)}")
+        except JceModelField.NotJceModelField:
+            continue
     return dict(sorted(jce_fields.items(), key=lambda item: item[1].jce_id))
 
 
