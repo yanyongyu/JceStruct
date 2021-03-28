@@ -1,7 +1,9 @@
 import abc
 import struct
 import typing
-from typing import Any, List, Dict, Type, Tuple, Generic, TypeVar, Mapping, Iterable, Optional, overload, TYPE_CHECKING
+import warnings
+from typing import (Any, List, Dict, Type, Tuple, Generic, TypeVar, Mapping,
+                    Iterable, Optional, overload, TYPE_CHECKING)
 
 from pydantic import BaseModel, Field
 from pydantic.main import ModelMetaclass
@@ -82,6 +84,9 @@ class JceModelField:
         self.jce_id: int = jce_id
         self.jce_type: Type[JceType] = jce_type
 
+    def __str__(self) -> str:
+        return f"<JceModelField id:{self.jce_id} type:{self.jce_type}>"
+
     @classmethod
     def from_modelfield(cls, field: ModelField) -> "JceModelField":
         field_info = field.field_info
@@ -96,8 +101,8 @@ def prepare_fields(fields: Dict[str, ModelField]) -> Dict[str, JceModelField]:
     for name, field in fields.items():
         try:
             jce_fields[name] = JceModelField.from_modelfield(field)
-        except ValueError:
-            continue
+        except ValueError as e:
+            warnings.warn(f"Error when parsing JCE field `{name}`: {repr(e)}")
     return dict(sorted(jce_fields.items(), key=lambda item: item[1].jce_id))
 
 
