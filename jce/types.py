@@ -75,7 +75,7 @@ def JceField(
 class JceModelField:
 
     def __init__(self, jce_id: int, jce_type: Type["JceType"]):
-        if not isinstance(jce_id, int) or jce_id < 1:
+        if not isinstance(jce_id, int) or jce_id < 0:
             raise ValueError(f"Invalid JCE ID")
         if not issubclass(jce_type, JceType):
             raise ValueError(f"Invalid JCE Type")
@@ -105,12 +105,14 @@ class JceEncoder:
 
     @staticmethod
     def encode_by_value(jce_id: int, jce_value: Optional["JceType"]) -> bytes:
-        return jce_value.to_bytes(jce_id, jce_value) if jce_value is not None else b""
+        return jce_value.to_bytes(jce_id,
+                                  jce_value) if jce_value is not None else b""
 
     @staticmethod
     def encode_by_type(jce_id: int, jce_type: Type["JceType"],
                        jce_value: Any) -> bytes:
-        return jce_type.to_bytes(jce_id, jce_value) if jce_value is not None else b""
+        return jce_type.to_bytes(jce_id,
+                                 jce_value) if jce_value is not None else b""
 
     @classmethod
     def encode_raw(cls, data: Dict[int, "JceType"]) -> bytes:
