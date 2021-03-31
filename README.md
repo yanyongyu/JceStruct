@@ -2,6 +2,12 @@
 
 Tencent JCE Encode/Decode with fully pydantic support
 
+## Before Using
+
+`JceStruct` is base on **python type hint** ([doc](https://www.python.org/dev/peps/pep-0484/)) and [Pydantic](https://pydantic-docs.helpmanual.io/).
+
+Data validation and IDE type checking are all supported.
+
 ## Installation
 
 ```bash
