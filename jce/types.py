@@ -269,6 +269,11 @@ class BOOL(JceType, int):
     def __new__(cls, value=None):
         return super().__new__(cls, bool(value))
 
+    def __str__(self):
+        return "True" if self else "False"
+    
+    __repr__ = __str__
+
     @classmethod
     def to_bytes(cls, jce_id: int, value: bool) -> bytes:
         return BYTE.to_bytes(jce_id, bytes([value]))
@@ -283,7 +288,7 @@ class BOOL(JceType, int):
             if len(v) != 1:
                 raise ValueError(f"Invalid byte length: {len(v)}")
             v, _ = cls.from_bytes(v)
-        elif not isinstance(v, bool):
+        elif not isinstance(v, int):
             raise TypeError(f"Invalid value type: {type(v)}")
         return cls(v)
 
