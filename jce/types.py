@@ -94,8 +94,8 @@ class JceModelField:
     def from_modelfield(cls, field: ModelField) -> "JceModelField":
         field_info = field.field_info
         jce_id = field_info.extra.get("jce_id")
-        jce_type = field_info.extra.get("jce_type") or typing.get_origin(
-            field.outer_type_) or field.outer_type_
+        jce_type = field_info.extra.get("jce_type") or getattr(
+            field.outer_type_, "__origin__", None) or field.outer_type_
         if jce_id is None or not issubclass(jce_type, JceType):
             raise cls.NotJceModelField
         return cls(jce_id, jce_type)
@@ -271,7 +271,7 @@ class BOOL(JceType, int):
 
     def __str__(self):
         return "True" if self else "False"
-    
+
     __repr__ = __str__
 
     @classmethod
@@ -444,7 +444,7 @@ class STRING4(STRING):
         return data[4:length + 4].decode(), length + 4
 
 
-class MAP(JceType, dict, Generic[T, VT]):
+class MAP(JceType, Dict[T, VT]):
     __jce_type__ = (8,)
 
     @classmethod
@@ -504,19 +504,19 @@ class MAP(JceType, dict, Generic[T, VT]):
         return new_instance
 
 
-class LIST(JceType, list, Generic[T]):
+class LIST(JceType, List[T]):
     __jce_type__ = (9,)
 
-    @overload
-    def __getitem__(self, index: int) -> T:
-        ...
+    # @overload
+    # def __getitem__(self, index: int) -> T:
+    #     ...
 
-    @overload
-    def __getitem__(self, index: slice) -> "LIST[T]":
-        ...
+    # @overload
+    # def __getitem__(self, index: slice) -> "LIST[T]":
+    #     ...
 
-    def __getitem__(self, index):
-        return super().__getitem__(index)
+    # def __getitem__(self, index):
+    #     return super().__getitem__(index)
 
     @classmethod
     def to_bytes(cls, jce_id: int, value: List[T]) -> bytes:
