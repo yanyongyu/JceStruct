@@ -1,9 +1,9 @@
 import abc
 import struct
-import typing
 import warnings
-from typing import (Any, List, Dict, Type, Tuple, Generic, TypeVar, Mapping,
-                    Iterable, Optional, overload, TYPE_CHECKING)
+from typing_extensions import get_origin
+from typing import (Any, List, Dict, Type, Tuple, TypeVar, Mapping, Iterable,
+                    Optional, TYPE_CHECKING)
 
 from pydantic import BaseModel, Field
 from pydantic.main import ModelMetaclass
@@ -94,8 +94,8 @@ class JceModelField:
     def from_modelfield(cls, field: ModelField) -> "JceModelField":
         field_info = field.field_info
         jce_id = field_info.extra.get("jce_id")
-        jce_type = field_info.extra.get("jce_type") or getattr(
-            field.outer_type_, "__origin__", None) or field.outer_type_
+        jce_type = field_info.extra.get("jce_type") or get_origin(
+            field.outer_type_) or field.outer_type_
         if jce_id is None or not issubclass(jce_type, JceType):
             raise cls.NotJceModelField
         return cls(jce_id, jce_type)

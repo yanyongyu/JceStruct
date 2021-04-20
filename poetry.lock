@@ -47,7 +47,7 @@ reference = "aliyun"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "8cbfdbb555bf085f011efc0c08be14d1db7a1b344e7a8fe96d3f57c92e6e66eb"
+content-hash = "b32eae0b94e2c3784141ac409ecddfba3d9462556b625e59c8423a9bae9d1f87"
 
 [metadata.files]
 pydantic = [
