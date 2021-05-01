@@ -737,8 +737,9 @@ class JceStruct(JceType, BaseModel, metaclass=JceMetaclass):
         for field_name in cls.__fields__.keys():
             if field_name in cls.__jce_fields__:
                 jce_info = cls.__jce_fields__[field_name]
-                data = v.get(jce_info.jce_id, _empty) or v.get(
-                    field_name, _empty)
+                data = v.get(jce_info.jce_id, _empty)
+                if data is _empty:
+                    data = v.get(field_name, _empty)
                 if data is _empty:
                     continue
                 values[field_name] = jce_info.jce_type.validate(data)
