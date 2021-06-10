@@ -633,7 +633,7 @@ class BYTES(JceType, bytes):
 
 class JceMetaclass(ModelMetaclass):
 
-    def __new__(mcs, name, bases, namespace):
+    def __new__(mcs, name, bases, namespace):  # type: ignore
         config = namespace.get("Config", object())
         Encoder = getattr(config, "jce_encoder", JceEncoder)
         Decoder = getattr(config, "jce_decoder", JceDecoder)
@@ -765,7 +765,7 @@ def guess_jce_type(object: Any) -> Type[JceType]:
         dict: MAP,
         list: LIST
     }
-    for type in types:
-        if isinstance(object, type):
-            return types[type]
+    for t in types:
+        if isinstance(object, t):
+            return types[t]
     raise TypeError("Unknown object type")

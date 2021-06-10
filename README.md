@@ -6,17 +6,25 @@ Tencent JCE Encode/Decode with fully pydantic support
 
 `JceStruct` is base on **python type hint** ([doc](https://www.python.org/dev/peps/pep-0484/)) and [Pydantic](https://pydantic-docs.helpmanual.io/).
 
-Data validation and IDE type checking are all supported.
+Read links above if first time using `type hint` or `pydantic model`.
+
+`Data validation` and `IDE type checking` are **all supported**.
 
 ## Installation
 
+Install directly
+
 ```bash
 pip install JceStruct
+# or
+poetry add JceStruct
 ```
 
 or install from source (using poetry)
 
 ```bash
+pip install git+https://github.com/yanyongyu/JceStruct.git
+# or
 poetry add git+https://github.com/yanyongyu/JceStruct.git
 ```
 
@@ -25,14 +33,16 @@ or clone and install
 ```bash
 git clone https://github.com/yanyongyu/JceStruct.git
 cd JceStruct
-poetry install
+poetry install  # with editable mode
 ```
 
 ## Usage
 
 ### Create Struct
 
-Create your struct by inheriting `JceStruct` and define your fields with `JceField`
+Create your struct by inheriting `JceStruct` and define your fields with `JceField`.
+
+> You can also combine your model fields with typing `Optional`, `Union`...
 
 ```python
 from jce import types, JceStruct, JceField
@@ -53,14 +63,27 @@ class ExampleStruct(JceStruct):
 
 ### Encode/Decode
 
+You can initialize a struct and encode it, or encode single field using `to_bytes` method.
+
 ```python
-# simple encode decode
+# simple struct encode
 example: ExampleStruct = ExampleStruct(
     field1=1, field2=2., field4=types.LIST[OtherStruct()]
 )
 bytes = example.encode()
 
+# single field encode
+bytes = types.STRING.to_bytes(jce_id=0, value="example")
+```
+
+You can decode bytes using `decode` classmethod of the struct, decode single field using `from_bytes` classmethod, or only get single list field using `decode_list` method of list inner struct.
+
+```python
+# simple struct decode
 example: ExampleStruct = ExampleStruct.decode(bytes, extra_pydantic_field="extra")
+
+# single field decode
+string, length = types.STRING.from_bytes(data=bytes, **extra)
 
 # decode list from example struct
 others: List[OtherStruct] = OtherStruct.decode_list(bytes, jce_id=3, **extra)
@@ -68,7 +91,7 @@ others: List[OtherStruct] = OtherStruct.decode_list(bytes, jce_id=3, **extra)
 
 ### Custom Encoder/Decoder
 
-Just inherit JceEncoder/JceDecoder and add it to your struct configuration
+Just inherit JceEncoder/JceDecoder and add it to your struct configuration.
 
 ```python
 from jce import JceStruct, JceEncoder
