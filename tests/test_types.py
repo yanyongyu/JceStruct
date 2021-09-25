@@ -1,11 +1,10 @@
 import unittest
 from typing import Dict
 
-from jce import types, JceDecoder
+from jce import JceDecoder, types
 
 
 class TestTypes(unittest.TestCase):
-
     def test_head_encode(self):
         raw = 1
         encoded = bytes.fromhex("10")
@@ -145,36 +144,46 @@ class TestTypes(unittest.TestCase):
     def test_map_encode(self):
         raw: Dict[types.JceType, types.JceType] = {
             types.STRING1("one"): types.STRING1("foo"),
-            types.STRING1("two"): types.STRING1("bar")
+            types.STRING1("two"): types.STRING1("bar"),
         }
-        encoded = bytes.fromhex("18 00 02 06 03 6F 6E 65 16 03 66 "
-                                "6F 6F 06 03 74 77 6F 16 03 62 61 72")
+        encoded = bytes.fromhex(
+            "18 00 02 06 03 6F 6E 65 16 03 66 "
+            "6F 6F 06 03 74 77 6F 16 03 62 61 72"
+        )
         self.assertEqual(types.MAP.to_bytes(1, raw), encoded)
 
         raw: Dict[types.JceType, types.JceType] = {
-            types.STRING1("one"):
-                types.MAP({types.STRING1("two"): types.BYTES("foo".encode())})
+            types.STRING1("one"): types.MAP(
+                {types.STRING1("two"): types.BYTES("foo".encode())}
+            )
         }
-        encoded = bytes.fromhex("18 00 01 06 03 6F 6E 65 18 00 01 "
-                                "06 03 74 77 6F 1D 00 00 03 66 6F 6F")
+        encoded = bytes.fromhex(
+            "18 00 01 06 03 6F 6E 65 18 00 01 "
+            "06 03 74 77 6F 1D 00 00 03 66 6F 6F"
+        )
         self.assertEqual(types.MAP.to_bytes(1, raw), encoded)
 
     def test_map_decode(self):
         raw: Dict[types.JceType, types.JceType] = {
             types.STRING1("one"): types.STRING1("foo"),
-            types.STRING1("two"): types.STRING1("bar")
+            types.STRING1("two"): types.STRING1("bar"),
         }
-        encoded = bytes.fromhex("18 00 02 06 03 6F 6E 65 16 03 66 "
-                                "6F 6F 06 03 74 77 6F 16 03 62 61 72")
+        encoded = bytes.fromhex(
+            "18 00 02 06 03 6F 6E 65 16 03 66 "
+            "6F 6F 06 03 74 77 6F 16 03 62 61 72"
+        )
         _, decoded, _ = JceDecoder.decode_single(encoded)
         self.assertEqual(types.MAP.validate(decoded), raw)
 
         raw: Dict[types.JceType, types.JceType] = {
-            types.STRING1("one"):
-                types.MAP({types.STRING1("two"): types.BYTES("foo".encode())})
+            types.STRING1("one"): types.MAP(
+                {types.STRING1("two"): types.BYTES("foo".encode())}
+            )
         }
-        encoded = bytes.fromhex("18 00 01 06 03 6F 6E 65 18 00 01 "
-                                "06 03 74 77 6F 1D 00 00 03 66 6F 6F")
+        encoded = bytes.fromhex(
+            "18 00 01 06 03 6F 6E 65 18 00 01 "
+            "06 03 74 77 6F 1D 00 00 03 66 6F 6F"
+        )
         _, decoded, _ = JceDecoder.decode_single(encoded)
         self.assertEqual(types.MAP.validate(decoded), raw)
 

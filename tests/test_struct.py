@@ -1,7 +1,7 @@
 import unittest
 from typing import List
 
-from jce import types, JceStruct, JceField
+from jce import JceField, JceStruct, types
 
 
 class SsoServerInfo(JceStruct):
@@ -17,84 +17,97 @@ class ServerListResponse(JceStruct):
 
 
 class TestStruct(unittest.TestCase):
-
     def test_struct_encode(self):
-        byte = SsoServerInfo(server="rcnb",
-                             port=8000,
-                             location="rcnb",
-                             extra="xxx").encode()
+        byte = SsoServerInfo(
+            server="rcnb", port=8000, location="rcnb", extra="xxx"
+        ).encode()
         self.assertEqual(
-            byte, bytes.fromhex("16 04 72 63 6e 62 21 1f 40 86 04 72 63 6e 62"))
+            byte, bytes.fromhex("16 04 72 63 6e 62 21 1f 40 86 04 72 63 6e 62")
+        )
 
     def test_struct_decode(self):
         a = SsoServerInfo.decode(
             bytes.fromhex("16 04 72 63 6e 62 21 1f 40 86 04 72 63 6e 62"),
-            extra="xxx")
-        b = SsoServerInfo(server="rcnb",
-                          port=8000,
-                          location="rcnb",
-                          extra="xxx")
+            extra="xxx",
+        )
+        b = SsoServerInfo(
+            server="rcnb", port=8000, location="rcnb", extra="xxx"
+        )
         self.assertEqual(a, b)
 
     def test_struct_nested_encode(self):
-        raw = ServerListResponse.parse_obj({
-            "server_list": [{
-                "server": "193.112.231.60",
-                "port": 8080,
-                "location": "sz",
-                "extra": "xxx",
-            }, {
-                "server": "42.81.172.215",
-                "port": 8080,
-                "location": "tj",
-                "extra": "xxx",
-            }, {
-                "server": "14.22.3.114",
-                "port": 8080,
-                "location": "sz",
-                "extra": "xxx",
-            }, {
-                "server": "14.215.138.110",
-                "port": 443,
-                "location": "sz",
-                "extra": "xxx",
-            }, {
-                "server": "42.81.169.100",
-                "port": 80,
-                "location": "tj",
-                "extra": "xxx",
-            }, {
-                "server": "114.221.144.76",
-                "port": 14000,
-                "location": "sh",
-                "extra": "xxx",
-            }, {
-                "server": "113.96.12.224",
-                "port": 443,
-                "location": "sz",
-                "extra": "xxx",
-            }, {
-                "server": "42.81.170.122",
-                "port": 8080,
-                "location": "tj",
-                "extra": "xxx",
-            }, {
-                "server": "114.221.148.67",
-                "port": 80,
-                "location": "sh",
-                "extra": "xxx",
-            }, {
-                "server": "msfwifi.3g.qq.com",
-                "port": 8080,
-                "location": "others",
-                "extra": "xxx",
-            }, {
-                "server": "42.81.172.63",
-                "port": 80,
-                "location": "tj",
-                "extra": "xxx",
-            }]
-        })
+        raw = ServerListResponse.parse_obj(
+            {
+                "server_list": [
+                    {
+                        "server": "193.112.231.60",
+                        "port": 8080,
+                        "location": "sz",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "42.81.172.215",
+                        "port": 8080,
+                        "location": "tj",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "14.22.3.114",
+                        "port": 8080,
+                        "location": "sz",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "14.215.138.110",
+                        "port": 443,
+                        "location": "sz",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "42.81.169.100",
+                        "port": 80,
+                        "location": "tj",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "114.221.144.76",
+                        "port": 14000,
+                        "location": "sh",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "113.96.12.224",
+                        "port": 443,
+                        "location": "sz",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "42.81.170.122",
+                        "port": 8080,
+                        "location": "tj",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "114.221.148.67",
+                        "port": 80,
+                        "location": "sh",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "msfwifi.3g.qq.com",
+                        "port": 8080,
+                        "location": "others",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "42.81.172.63",
+                        "port": 80,
+                        "location": "tj",
+                        "extra": "xxx",
+                    },
+                ]
+            }
+        )
         encoded = bytes.fromhex(
             "29000B0A160E3139332E3131322E3233312E3630211F908602737A0B"
             "0A160D34322E38312E3137322E323135211F908602746A0B0A160B31"
@@ -105,68 +118,83 @@ class TestStruct(unittest.TestCase):
             "737A0B0A160D34322E38312E3137302E313232211F908602746A0B0A"
             "160E3131342E3232312E3134382E36372050860273680B0A16116D73"
             "66776966692E33672E71712E636F6D211F9086066F74686572730B0A"
-            "160C34322E38312E3137322E363320508602746A0B")
+            "160C34322E38312E3137322E363320508602746A0B"
+        )
         self.assertEqual(raw.encode(), encoded)
 
     def test_struct_nested_decode(self):
-        raw = ServerListResponse.parse_obj({
-            "server_list": [{
-                "server": "193.112.231.60",
-                "port": 8080,
-                "location": "sz",
-                "extra": "xxx",
-            }, {
-                "server": "42.81.172.215",
-                "port": 8080,
-                "location": "tj",
-                "extra": "xxx",
-            }, {
-                "server": "14.22.3.114",
-                "port": 8080,
-                "location": "sz",
-                "extra": "xxx",
-            }, {
-                "server": "14.215.138.110",
-                "port": 443,
-                "location": "sz",
-                "extra": "xxx",
-            }, {
-                "server": "42.81.169.100",
-                "port": 80,
-                "location": "tj",
-                "extra": "xxx",
-            }, {
-                "server": "114.221.144.76",
-                "port": 14000,
-                "location": "sh",
-                "extra": "xxx",
-            }, {
-                "server": "113.96.12.224",
-                "port": 443,
-                "location": "sz",
-                "extra": "xxx",
-            }, {
-                "server": "42.81.170.122",
-                "port": 8080,
-                "location": "tj",
-                "extra": "xxx",
-            }, {
-                "server": "114.221.148.67",
-                "port": 80,
-                "location": "sh",
-                "extra": "xxx",
-            }, {
-                "server": "msfwifi.3g.qq.com",
-                "port": 8080,
-                "location": "others",
-                "extra": "xxx",
-            }, {
-                "server": "42.81.172.63",
-                "port": 80,
-                "location": "tj",
-                "extra": "xxx",
-            }]
-        })
+        raw = ServerListResponse.parse_obj(
+            {
+                "server_list": [
+                    {
+                        "server": "193.112.231.60",
+                        "port": 8080,
+                        "location": "sz",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "42.81.172.215",
+                        "port": 8080,
+                        "location": "tj",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "14.22.3.114",
+                        "port": 8080,
+                        "location": "sz",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "14.215.138.110",
+                        "port": 443,
+                        "location": "sz",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "42.81.169.100",
+                        "port": 80,
+                        "location": "tj",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "114.221.144.76",
+                        "port": 14000,
+                        "location": "sh",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "113.96.12.224",
+                        "port": 443,
+                        "location": "sz",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "42.81.170.122",
+                        "port": 8080,
+                        "location": "tj",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "114.221.148.67",
+                        "port": 80,
+                        "location": "sh",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "msfwifi.3g.qq.com",
+                        "port": 8080,
+                        "location": "others",
+                        "extra": "xxx",
+                    },
+                    {
+                        "server": "42.81.172.63",
+                        "port": 80,
+                        "location": "tj",
+                        "extra": "xxx",
+                    },
+                ]
+            }
+        )
         encoded = bytes.fromhex(
             "100129000B0A160E3139332E3131322E3233312E3630211F9030014C"
             "5C600870018602737A96066F74686572730B0A160D34322E38312E31"
@@ -214,7 +242,8 @@ class TestStruct(unittest.TestCase):
             "38312E3136392E313035205030014C500360087C8602746A96037465"
             "6C0BED000CF90F0CF9100CF9110CF01202F113FF38F6142832303230"
             "2D31322D32352032323A35383A32382064656C6976657279696E6720"
-            "6120706F6C696379")
+            "6120706F6C696379"
+        )
         self.assertEqual(ServerListResponse.decode(encoded, extra="xxx"), raw)
 
     def test_sruct_list_decode(self):
@@ -222,7 +251,8 @@ class TestStruct(unittest.TestCase):
             "100129000B0A160E3139332E3131322E3233312E3630211F9030014C5C600870018602737A96066F74686572730B0A160D34322E38312E3137322E323135211F9030014C5C600870018602746A960374656C0B0A160B31342E32322E332E313134211F9030014C5C600870018602737A960374656C0B0A160E31342E3231352E3133382E3131302101BB30014C5C600870018602737A960374656C0B0A160D34322E38312E3136392E313030205030014C5C600870018602746A960374656C0B0A160E3131342E3232312E3134342E37362136B030014C5C6008700186027368960374656C0B0A160D3131332E39362E31322E3232342101BB30014C5C600870018602737A960374656C0B0A160D34322E38312E3137302E313232211F9030014C5C600870018602746A960374656C0B0A160E3131342E3232312E3134382E3637205030014C5C6008700186027368960374656C0B0A16116D7366776966692E33672E71712E636F6D211F9030014C5C60087C86066F746865727396066F74686572730B0A160C34322E38312E3137322E3633205030014C5C600870018602746A960374656C0B39000B0A160E3139332E3131322E3233312E3630211F9030014C5C600870018602737A96066F74686572730B0A160D34322E38312E3137322E323135211F9030014C5C600870018602746A960374656C0B0A160B31342E32322E332E313134211F9030014C5C600870018602737A960374656C0B0A160E31342E3231352E3133382E3131302101BB30014C5C600870018602737A960374656C0B0A160D34322E38312E3136392E313030205030014C5C600870018602746A960374656C0B0A160E3131342E3232312E3134342E37362136B030014C5C6008700186027368960374656C0B0A160D3131332E39362E31322E3232342101BB30014C5C600870018602737A960374656C0B0A160D34322E38312E3137302E313232211F9030014C5C600870018602746A960374656C0B0A160E3131342E3232312E3134382E3637205030014C5C6008700186027368960374656C0B0A16116D7366776966692E33672E71712E636F6D211F9030014C5C60087C86066F746865727396066F74686572730B0A160C34322E38312E3137322E3633205030014C5C600870018602746A960374656C0B425FE636545138406C7C80029005ACBCC900050A160E3130392E3234342E3132392E3135205030014C500360087C8602737A96066F74686572730B0A160D34322E38312E3136392E313035205030014C500360087C8602746A960374656C0B0A160C3131332E39362E31332E3434205030014C500360087C8602737A960374656C0B0A160E3131342E3232312E3134342E3232205030014C500360087C86027368960374656C0B0A160D34322E38312E3136392E313035205030014C500360087C8602746A960374656C0BD900050A160E3130392E3234342E3132392E3135205030014C500360087C8602737A96066F74686572730B0A160D34322E38312E3136392E313035205030014C500360087C8602746A960374656C0B0A160C3131332E39362E31332E3434205030014C500360087C8602737A960374656C0B0A160E3131342E3232312E3134342E3232205030014C500360087C86027368960374656C0B0A160D34322E38312E3136392E313035205030014C500360087C8602746A960374656C0BED000CF90F0CF9100CF9110CF01202F113FF38F61428323032302D31322D32352032323A35383A32382064656C6976657279696E67206120706F6C696379"
         )
         self.assertEqual(
-            len(SsoServerInfo.decode_list(encoded, 2, extra="xxx")), 11)
+            len(SsoServerInfo.decode_list(encoded, 2, extra="xxx")), 11
+        )
 
 
 if __name__ == "__main__":
