@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "JceStruct"
-version = "0.1.4"
+version = "0.1.5"
 description = "JCE Encode/Decode"
 authors = ["yanyongyu <yanyongyu_1@126.com>"]
 license = "MIT"
